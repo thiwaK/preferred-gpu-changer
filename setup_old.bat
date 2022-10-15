@@ -5,7 +5,7 @@ rem add preferred gpu selector to context menu
 ::: Setup Environment -------------------------------------------------------------------
 set base_reg_key=HKEY_CLASSES_ROOT\*\shell\GpuPref
 set base_dir=%programdata%\GpuPref
-set base_file=%base_dir%\main.exe
+set base_file=%base_dir%\main.bat
 
 :: Check confiuration
 echo. - Verify register entries
@@ -52,6 +52,9 @@ if '%errorlevel%' NEQ '0' (
     CD /D "%~dp0"
 
 echo. - Installing
+:: write data
+echo. > %base_file%>nul && IF %errorlevel% NEQ 0 GOTO _ERROR unable_write_data
+
 :: setup context menu
 reg add "%base_reg_key%" /f /v "SubCommands" /t REG_SZ /d "">nul && IF %errorlevel% NEQ 0 GOTO _ERROR unable_to_add_register_entaries
 reg add "%base_reg_key%" /f /v "MUIVerb" /t REG_SZ /d "Run with graphics processor">nul && IF %errorlevel% NEQ 0 GOTO _ERROR unable_to_add_register_entaries
@@ -65,9 +68,13 @@ reg add "%base_reg_key%\shell\Dedicated" /f /v "MUIVerb" /t REG_SZ /d "High Pref
 reg add "%base_reg_key%\shell\Dedicated" /f /v "Icon" /t REG_SZ /d "">nul && IF %errorlevel% NEQ 0 GOTO _ERROR unable_to_add_register_entaries
 reg add "%base_reg_key%\shell\Dedicated\command" /f /ve /t REG_SZ /d "\"%base_file%\" \"%%1\" \"2\"">nul && IF %errorlevel% NEQ 0 GOTO _ERROR unable_to_add_register_entaries
 
-del %base_file%
-xcopy "%~dp0main.exe" %base_dir% /Y > nul
 
+
+for /f "useback delims=" %%_ in (%0) do (
+  if "%%_"=="___MAIN_END___" set $=
+  if defined $ echo(%%_ >> %base_file%
+  if "%%_"=="___MAIN_START___" set $=1
+)
 goto :_END
 
 :_END
@@ -84,3 +91,60 @@ echo. Error : %1
 echo.
 pause
 goto :eof
+
+::: Main Application --------------------------------------------------------------------
+___MAIN_START___
+@echo off
+title GPU Preference Changer - thiwaK
+set base_dir=%programdata%\GpuPref
+pushd %base_dir%
+set app=%1%
+set new_preference=%2%
+set reg_key=HKCU\Software\Microsoft\DirectX\UserGpuPreferences
+set quary_all=reg QUERY %reg_key% /s
+set quary_app=reg QUERY %reg_key% /v "%app%"
+set app_registered=
+set current_preference=
+set error="& {Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.MessageBox]::Show('Unable to modify register. Terminating.', 'Prefered GPU', 'OK', [System.Windows.Forms.MessageBoxIcon]::Error);}"
+
+:: Check if app already registered
+for /F "tokens=*" %%i IN ('%quary_all%') DO (
+	echo.%%i | find /i "%app%">nul && (
+    	set app_registered=%%i
+    	goto _CHECK_PREFERENCE
+	)
+)
+
+:: Set current preference for app already not registered
+set current_preference=0
+goto _START_APP
+
+:_CHECK_PREFERENCE
+:: Get gpu preference
+echo.%app_registered% | find /i "GpuPreference=2">nul && (
+    REM High Preformence
+    set current_preference=2
+
+) || (
+    echo.%app_registered% | find /i "GpuPreference=1">nul && (
+	    REM Shared
+	    set current_preference=1
+
+	) || (
+	    REM Windows Decide
+	    set current_preference=0
+	)
+)
+
+:_START_APP
+set errorlevel=0
+REG ADD "%reg_key%" /v "%app%" /t REG_SZ /d "GpuPreference=%new_preference%" /f > nul
+if errorlevel 1 (
+  powershell -Command %error% > nul
+  exit
+)
+
+start /wait "" "%app%"
+REG ADD "%reg_key%" /v "%app%" /t REG_SZ /d "GpuPreference=%current_preference%" /f > nul
+exit
+___MAIN_END___
