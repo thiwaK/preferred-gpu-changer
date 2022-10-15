@@ -1,6 +1,6 @@
 @echo off
 
-rem Change prefered gpu to run application
+rem add preferred gpu selector to context menu
 
 ::: Setup Environment -------------------------------------------------------------------
 set base_reg_key=HKEY_CLASSES_ROOT\*\shell\GpuPref
