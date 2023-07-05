@@ -8,6 +8,11 @@ I have developed a simple application that simplifies this process. It restores 
 
 To install the application, download the installer from the releases page. Once the installer is downloaded, run it and follow the on-screen instructions. The application will be installed and you can start using it right away.
 
+
+## Note
+
+The changes made by this application will only take effect while the application is running, whether in the background or foreground. When the application is terminated, the changes will automatically revert to their original values.
+
 ## Screenshots
 
 ![Screenshot 1](Assets\Screenshot1.png "Screenshot 1")
