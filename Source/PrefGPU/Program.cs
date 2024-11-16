@@ -12,35 +12,43 @@ namespace PrefGPU
 		static extern IntPtr GetConsoleWindow();
 		[DllImport("user32.dll")]
 		static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+		
 		const int SW_HIDE = 0;
-		static int current_settings;
+		static int CURRENT_SETTINGS;
 
 		public static void Main(string[] args) {
 
+			Message.Show("Operation completed successfully.", Message.Info);
+
+
 			var handle = GetConsoleWindow();
 			ShowWindow(handle, SW_HIDE);
-			if (args.Length < 2) {
-				Console.WriteLine("Invalid arguments:"+args.Length);Console.ReadKey();
+			if (args.Length != 2) {
+				Console.WriteLine("Invalid arguments:"+args.Length);
+				Console.ReadKey();
 				return;
 			}
+
 			string app = args[0];
 			string gpu_id = args[1];
 			if (!File.Exists(app)) {
-				Console.WriteLine("App not exists");Console.ReadKey();
+				Console.WriteLine("App not exists");
+				Console.ReadKey();
 				return;
 			}
 
-            current_settings = GetCurrentSettings(app);
-			Console.WriteLine(current_settings);
-			Console.WriteLine(SetGPU(app, gpu_id));
+            CURRENT_SETTINGS = getCurrentSettings(app);
+			Console.WriteLine(CURRENT_SETTINGS);
+			
+			setGPU(app, gpu_id);
 			Thread.Sleep(1000);
-            RunApp(app, "");
-			Console.WriteLine();
-			//Console.ReadKey();
-
+            runApp(app, "");
+			
+			// Console.WriteLine();
+			// Console.ReadKey();
 		}
 
-		private static int GetCurrentSettings(string file) { 
+		private static int getCurrentSettings(string file) { 
 		
 			Microsoft.Win32.RegistryKey key;
 			key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\DirectX\\UserGpuPreferences");
@@ -61,7 +69,7 @@ namespace PrefGPU
 			return 0;
 		}
 
-		private static int SetGPU(string name, string val) {
+		private static int setGPU(string name, string val) {
 
 			Process runProg = new Process();
 			string reg_key = @"HKCU\Software\Microsoft\DirectX\UserGpuPreferences";
@@ -74,11 +82,10 @@ namespace PrefGPU
 				runProg.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
 				runProg.StartInfo.Arguments = command;
 				runProg.StartInfo.RedirectStandardOutput = true;
-
-			    runProg.Start();
+				runProg.Start();
 
 				while (!runProg.StandardOutput.EndOfStream) {
-				    string line = runProg.StandardOutput.ReadLine();
+					string line = runProg.StandardOutput.ReadLine();
 					//Console.WriteLine(line);
 				}
 
@@ -90,7 +97,7 @@ namespace PrefGPU
 			}
 		}
 
-		private static void RunApp(string file, string arg) { 
+		private static void runApp(string file, string arg) { 
 		
 			Process runProg = new Process();
 			try {
@@ -99,6 +106,7 @@ namespace PrefGPU
 				runProg.StartInfo.CreateNoWindow = false;
 				runProg.StartInfo.UseShellExecute = false;
 				runProg.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+				
 				if (arg.Length > 0) {
 					runProg.StartInfo.Arguments = arg;
 				}
@@ -106,15 +114,51 @@ namespace PrefGPU
 			    runProg.Start();
 				runProg.WaitForExit();
 
-				SetGPU(file, current_settings.ToString());
+				setGPU(file, CURRENT_SETTINGS.ToString());
 			}
 			catch (Exception ex)
 			{
 				Console.WriteLine("Could not start program " + ex);
 			}
-		
+		}
+
+		public enum GpuPreference {
+		    HighPerformance = 2,
+		    PowerSaving = 1,
+		    Default = 0
 		}
 
 
+	}
+
+
+	public static class Message
+	{
+	    public static readonly System.Windows.Forms.MessageBoxIcon Info = System.Windows.Forms.MessageBoxIcon.Information;
+	    public static readonly System.Windows.Forms.MessageBoxIcon Error = System.Windows.Forms.MessageBoxIcon.Error;
+	    public static readonly System.Windows.Forms.MessageBoxIcon Warning = System.Windows.Forms.MessageBoxIcon.Warning;
+	    public static readonly System.Windows.Forms.MessageBoxIcon None = System.Windows.Forms.MessageBoxIcon.None;
+
+	    public static void Show(string message, System.Windows.Forms.MessageBoxIcon icon = System.Windows.Forms.MessageBoxIcon.None)
+	    {
+	        string title;
+	        switch (icon)
+	        {
+	            case System.Windows.Forms.MessageBoxIcon.Information:
+	                title = "Information";
+	                break;
+	            case System.Windows.Forms.MessageBoxIcon.Error:
+	                title = "Error";
+	                break;
+	            case System.Windows.Forms.MessageBoxIcon.Warning:
+	                title = "Warning";
+	                break;
+	            default:
+	                title = "Message";
+	                break;
+	        }
+
+	        System.Windows.Forms.MessageBox.Show(message, title, System.Windows.Forms.MessageBoxButtons.OK, icon);
+	    }
 	}
 }
