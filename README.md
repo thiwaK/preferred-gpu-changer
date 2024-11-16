@@ -1,11 +1,5 @@
 # Preferred GPU Changer
-
-
-
----
-### ⚠️ Note
-This application operates dynamically and applies changes only while it is running, either in the foreground or background. Once the application is closed, all changes will automatically revert to their default settings.
-
+A lightweight application that restores the "Run with graphics processor" context menu option, allowing you to easily select a preferred GPU for any application without navigating through complex settings.
 
 ---
 ### ✨ Background
@@ -31,12 +25,13 @@ The application checks the current GPU preference for the specified application 
 * It searches for the application name within the registry values and checks the GPU preference associated with it.
 
 The possible GPU preference values are:
-- `GpuPreference=1`: Integrated GPU
-- `GpuPreference=2`: Discrete GPU
+- `GpuPreference=0`: Let Windows Choose
+- `GpuPreference=1`: Power Saving GPU
+- `GpuPreference=2`: High Performance GPU
 
 If no preference is found, it defaults to `GpuPreference=0`, which means the system chooses automatically.
 
-Once the current GPU setting is retrieved, the application sets the new GPU preference by adding a new registry entry or modifying the existing one. After updating the GPU preference, the application is then launched. Once the application closes, the original GPU setting is restored to its previous state.
+Once the current GPU setting is retrieved, the application sets the new GPU preference by adding a new registry entry or modifying the existing one. After updating the GPU preference, the application is then launched.
 
 ---
 ### ⚙️ Getting Started
@@ -51,7 +46,24 @@ Once the current GPU setting is retrieved, the application sets the new GPU pref
    * You will see a "Run with graphics processor" option in the context menu. Select it to choose the GPU you want to use for that application.
 
 
-![Screenshot 1](Assets\Screenshot1.png "Screenshot 1")
+---
+### 🔧 Usage
+Right-click on the executable file or its shortcut to open the context menu. You’ll see the following options
+
+
+**Temporary GPU Settings**
+These options apply only while the application is running. The settings revert to default once the application is closed:
+- `High Performance`: Runs the application on the high-performance GPU.
+- `Power Saving`: Runs the application on the power-saving GPU.
+
+**Permanent GPU Settings**
+These options set a permanent GPU preference for the application, lasting until changed via this menu or Windows Graphics Settings:
+- `Default (Permanent)`: Resets the GPU preference to the system default.
+- `High Performance (Permanent)`: Forces the application to always use the high-performance GPU.
+- `Power Saving (Permanent)`: Forces the application to always use the power-saving GPU.
+
+**Note**: Temporary settings are ideal for one-time tasks, while permanent settings are useful for applications with specific GPU requirements.
 
 ---
-
+### 🚀 Contribution
+Contributions are welcome! Feel free to open issues, submit PRs, or suggest improvements to make this tool more valuable.
