@@ -18,34 +18,44 @@ namespace PrefGPU
 
 		public static void Main(string[] args) {
 
-			Message.Show("Operation completed successfully.", Message.Info);
-
-
 			var handle = GetConsoleWindow();
 			ShowWindow(handle, SW_HIDE);
 			if (args.Length != 2) {
-				Console.WriteLine("Invalid arguments:"+args.Length);
-				Console.ReadKey();
+				Message.Show("Missing required arguments\nfound:"+args.Length+"\nrequired:2", Message.Error);
 				return;
 			}
 
 			string app = args[0];
-			string gpu_id = args[1];
 			if (!File.Exists(app)) {
-				Console.WriteLine("App not exists");
-				Console.ReadKey();
+				Message.Show("The executable does not exists", Message.Error);
+				return;
+			}
+
+			string gpu_id = args[1];
+			if (Convert.ToInt32(gpu_id) > 5 || Convert.ToInt32(gpu_id) < 0) {
+				Message.Show("Invalid GPU ID", Message.Error);
 				return;
 			}
 
             CURRENT_SETTINGS = getCurrentSettings(app);
 			Console.WriteLine(CURRENT_SETTINGS);
-			
+
+			bool is_permenent = false;
+			if (Convert.ToInt32(gpu_id) > 2){
+				// Permenent
+				gpu_id = Convert.ToString(Convert.ToInt32(gpu_id) - 3);
+				is_permenent = true;
+
+			}
+
 			setGPU(app, gpu_id);
 			Thread.Sleep(1000);
-            runApp(app, "");
+			runApp(app, "");
 			
-			// Console.WriteLine();
-			// Console.ReadKey();
+
+			if (!is_permenent){
+				setGPU(app, CURRENT_SETTINGS.ToString());
+			}
 		}
 
 		private static int getCurrentSettings(string file) { 
@@ -86,13 +96,12 @@ namespace PrefGPU
 
 				while (!runProg.StandardOutput.EndOfStream) {
 					string line = runProg.StandardOutput.ReadLine();
-					//Console.WriteLine(line);
 				}
 
 				return runProg.ExitCode;
 
 			} catch (Exception ex) {
-				Console.WriteLine("Could not start program " + ex);
+				Message.Show("Could not modify the register\n" + ex, Message.Error);
 				return 1;
 			}
 		}
@@ -113,22 +122,11 @@ namespace PrefGPU
 
 			    runProg.Start();
 				runProg.WaitForExit();
-
-				setGPU(file, CURRENT_SETTINGS.ToString());
 			}
-			catch (Exception ex)
-			{
-				Console.WriteLine("Could not start program " + ex);
+			catch (Exception ex) {
+				Message.Show("Could not start the executable\n" + ex, Message.Error);
 			}
 		}
-
-		public enum GpuPreference {
-		    HighPerformance = 2,
-		    PowerSaving = 1,
-		    Default = 0
-		}
-
-
 	}
 
 

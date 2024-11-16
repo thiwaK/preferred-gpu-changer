@@ -51,16 +51,15 @@ Once the current GPU setting is retrieved, the application sets the new GPU pref
 Right-click on the executable file or its shortcut to open the context menu. You’ll see the following options
 
 
-**Temporary GPU Settings**
-These options apply only while the application is running. The settings revert to default once the application is closed:
-- `High Performance`: Runs the application on the high-performance GPU.
+**Temporary GPU Settings:** These options apply only while the application is running. The settings revert to default once the application is closed:
 - `Power Saving`: Runs the application on the power-saving GPU.
+- `High Performance`: Runs the application on the high-performance GPU.
 
-**Permanent GPU Settings**
-These options set a permanent GPU preference for the application, lasting until changed via this menu or Windows Graphics Settings:
+**Permanent GPU Settings:** These options set a permanent GPU preference for the application, lasting until changed via this menu or Windows Graphics Settings:
 - `Default (Permanent)`: Resets the GPU preference to the system default.
-- `High Performance (Permanent)`: Forces the application to always use the high-performance GPU.
 - `Power Saving (Permanent)`: Forces the application to always use the power-saving GPU.
+- `High Performance (Permanent)`: Forces the application to always use the high-performance GPU.
+
 
 **Note**: Temporary settings are ideal for one-time tasks, while permanent settings are useful for applications with specific GPU requirements.
 
