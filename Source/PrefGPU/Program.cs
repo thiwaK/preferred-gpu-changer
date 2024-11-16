@@ -83,7 +83,7 @@ namespace PrefGPU
 
 			Process runProg = new Process();
 			string reg_key = @"HKCU\Software\Microsoft\DirectX\UserGpuPreferences";
-			string command = "ADD \"" + reg_key + "\" /v \"" + name + "\" /t REG_SZ /d \"GpuPreference=" + val + "\" /f";
+			string command = "ADD \"" + reg_key + "\" /v \"" + name + "\" /t REG_SZ /d \"GpuPreference=" + val + ";" + "\" /f";
 			try
 			{
 				runProg.StartInfo.FileName = "reg";		    
